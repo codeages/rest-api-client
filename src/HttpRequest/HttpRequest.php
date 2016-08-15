@@ -16,5 +16,5 @@ abstract class HttpRequest
         $this->debug = $debug;
     }
 
-    abstract public function request($method, $url, $body, array $header = array());
+    abstract public function request($method, $url, $body, array $header = array(), $requestId);
 }

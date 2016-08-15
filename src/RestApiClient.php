@@ -72,7 +72,7 @@ class RestApiClient
         $url = $this->makeUrl($uri);
         $headers = array_merge($this->spec->getHeaders($token, $requestId), $headers);
 
-        return $this->http->request($method, $url, $body, $headers);
+        return $this->http->request($method, $url, $body, $headers, $requestId);
     }
 
     protected function makeRequestId()

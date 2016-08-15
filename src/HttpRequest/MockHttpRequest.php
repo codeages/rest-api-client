@@ -8,7 +8,7 @@ class MockHttpRequest extends HttpRequest
 {
     protected $callbacks;
 
-    public function request($method, $url, $body, array $header = array())
+    public function request($method, $url, $body, array $header = array(), $requestId = '')
     {
         $callback = array_shift($this->callbacks);
 

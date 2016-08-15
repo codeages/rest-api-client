@@ -6,9 +6,9 @@ use Codeages\RestApiClient\Exceptions\ResponseException;
 
 class CurlHttpRequest extends HttpRequest
 {
-    public function request($method, $url, $body, array $headers = array())
+    public function request($method, $url, $body, array $headers = array(), $requestId = '')
     {
-        $this->debug && $this->logger && $this->logger->debug("[{$requestId}] {$method} {$url}", array('params' => $params, 'headers' => $headers));
+        $this->debug && $this->logger && $this->logger->debug($this->message($requestId, "{$method} {$url}"), array('headers' => $headers, 'body' => $body));
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_USERAGENT, $this->options['userAgent']);
@@ -43,10 +43,6 @@ class CurlHttpRequest extends HttpRequest
         $header = substr($response, 0, $curlinfo['header_size']);
         $body   = substr($response, $curlinfo['header_size']);
 
-        $this->debug && $this->logger && $this->logger->debug("[{$requestId}] CURL_INFO", $curlinfo);
-        $this->debug && $this->logger && $this->logger->debug("[{$requestId}] RESPONSE_HEADER {$header}");
-        $this->debug && $this->logger && $this->logger->debug("[{$requestId}] RESPONSE_BODY {$body}");
-
         curl_close($curl);
 
         $context = array(
@@ -55,33 +51,45 @@ class CurlHttpRequest extends HttpRequest
             'BODY'     => $body
         );
 
+        $this->debug && $this->logger && $this->logger->debug($this->message($requestId, 'Response context.'), $context);
+
         if (empty($curlinfo['namelookup_time'])) {
-            $this->logger && $this->logger->error("[{$requestId}] NAME_LOOK_UP_TIMEOUT", $context);
+            $message = $this->message($requestId, "Dns look up timeout (url: {$url}).");
+            $this->logger && $this->logger->error($message, $context);
+            throw new ResponseException($message);
         }
 
         if (empty($curlinfo['connect_time'])) {
-            $this->logger && $this->logger->error("[{$requestId}] API_CONNECT_TIMEOUT", $context);
-            throw new ResponseException("Connect api server timeout (url: {$url}).");
+            $message = $this->message($requestId, "Connect timeout (url: {$url}).");
+            $this->logger && $this->logger->error($message, $context);
+            throw new ResponseException($message);
         }
 
         if (empty($curlinfo['starttransfer_time'])) {
-            $this->logger && $this->logger->error("[{$requestId}] API_TIMEOUT", $context);
-            throw new ResponseException("Request api server timeout (url:{$url}).");
+            $message = $this->message($requestId, "Request timeout (url: {$url}).");
+            $this->logger && $this->logger->error($message, $context);
+            throw new ResponseException($message);
         }
 
         if ($curlinfo['http_code'] >= 500) {
-            $this->logger && $this->logger->error("[{$requestId}] API_RESOPNSE_ERROR", $context);
-            throw new ServerException("Api server internal error (url:{$url}).");
+            $message = $this->message($requestId, "Server internal error (url: {$url}).");
+            $this->logger && $this->logger->error($message, $context);
+            throw new ServerException($message);
         }
 
         $result = $this->spec->unserialize($body);
-
         if (empty($result)) {
-            $this->logger && $this->logger->error("[{$requestId}] RESPONSE_JSON_DECODE_ERROR", $context);
-            throw new ResponseException("Api result json decode error: (url:{$url}).");
+            $message = $this->message($requestId, "Resut unserialize error (url: {$url}).");
+            $this->logger && $this->logger->error($message, $context);
+            throw new ResponseException($message);
         }
 
         return $result;
+    }
+
+    protected function message($requestId, $message)
+    {
+        return "[CurlHttpRequest #$requestId] {$message}";
     }
 
 }
