@@ -3,6 +3,7 @@
 use Codeages\RestApiClient\RestApiClient;
 use Codeages\RestApiClient\Specification\JsonHmacSpecification;
 use Codeages\RestApiClient\HttpRequest\MockHttpRequest;
+use Codeages\RestApiClient\Tests\TestLogger;
 
 class RestApiClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -16,8 +17,9 @@ class RestApiClientTest extends \PHPUnit_Framework_TestCase
         );
         $spec = new JsonHmacSpecification();
         $http = new MockHttpRequest([]);
+        $logger = new TestLogger();
 
-        $client = new RestApiClient($config, $spec, $http);
+        $client = new RestApiClient($config, $spec, $http, $logger, true);
 
         $http->mock(function() {
             return 1;

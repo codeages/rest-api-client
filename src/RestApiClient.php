@@ -32,7 +32,7 @@ class RestApiClient
                 'connectTimeout' => isset($config['connectTimeout']) ? intval($config['connectTimeout']) : 10,
                 'timeout' => isset($config['timeout']) ? intval($config['timeout']) : 10,
             );
-            $this->http = new CurlHttpRequest($options);
+            $this->http = new CurlHttpRequest($options, $logger, $debug);
         } else {
             $this->http = $http;
         }

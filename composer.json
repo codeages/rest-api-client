@@ -18,7 +18,8 @@
     },
     "autoload" : {
         "psr-4": {
-            "Codeages\\RestApiClient\\" : "src"
+            "Codeages\\RestApiClient\\" : "src",
+            "Codeages\\RestApiClient\\Tests\\" : "tests"
         }
     }
 }
