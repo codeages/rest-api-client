@@ -1,8 +1,17 @@
 <?php
-namespace Codeages\RESTAPIClient\Specification;
+namespace Codeages\RestApiClient\Specification;
 
 interface Specification
 {
+    /**
+     * 获得请求的头部信息
+     * 
+     * @param  string $token     授权码
+     * @param  string $requestId 本次请求ID
+     * @return array             请求头部的一个列表
+     */
+    public function getHeaders($token, $requestId = '');
+
     /**
      * 对请求制作授权码
      * 

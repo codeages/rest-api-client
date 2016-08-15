@@ -1,24 +1,35 @@
 <?php
-namespace Codeages\RESTAPIClient;
-
-use Codeages\RESTAPIClient\Exceptions\ServerException;
-use Codeages\RESTAPIClient\Exceptions\ResponseException;
+namespace Codeages\RestApiClient;
 
 use Psr\Log\LoggerInterface;
+use Codeages\RestApiClient\Specification\Specification;
+use Codeages\RestApiClient\Exceptions\ServerException;
+use Codeages\RestApiClient\Exceptions\ResponseException;
 
-class Client
+class RestApiClient
 {
     protected $config;
 
     protected $debug;
 
-    protected $logger = null;
+    protected $logger;
 
-    public function __construct($config, $spec);
+    protected $http;
+
+    public function __construct($config, Specification $spec, $debug = false, LoggerInterface $logger = null)
     {
-        $this->config = $config;
-        $this->debug = empty($config['debug']) ? false : true;
+        $this->config = array_merge(array(
+            'lifetime' => 600,
+        ), $config);
+
         $this->spec = $spec;
+        $this->debug = $debug;
+        $this->logger = $logger;
+        $this->http = array(
+            'userAgent' => 'Codeages Rest Api Client v1.0.0',
+            'connectTimeout' => isset($config['connectTimeout']) ? intval($config['connectTimeout']) : 10,
+            'timeout' => isset($config['timeout']) ? intval($config['timeout']) : 10,
+        );
     }
 
     public function post($uri, array $params = array(), array $header = array())
@@ -54,33 +65,27 @@ class Client
 
     protected function _request($method, $uri, $params, $headers)
     {
-        $requestId = substr(md5(uniqid('', true)), -16);
+        $requestId = $this->makeRequestId();
 
-        $url = $this->_makeUrl($uri);
+        $url = $this->makeUrl($uri);
 
         $this->debug && $this->logger && $this->logger->debug("[{$requestId}] {$method} {$url}", array('params' => $params, 'headers' => $headers));
 
         $curl = curl_init();
-
-        // curl_setopt($curl, CURLOPT_USERAGENT, $this->userAgent);
-
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_USERAGENT, $this->http['userAgent']);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->http['connectTimeout']);
+        curl_setopt($curl, CURLOPT_TIMEOUT, $this->http['timeout']);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_HEADER, 1);
 
         if ($method == 'POST') {
             curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
         } elseif ($method == 'PUT') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
         } elseif ($method == 'DELETE') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
         } elseif ($method == 'PATCH') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
         } else {
             if (!empty($params)) {
                 $url = $url.(strpos($url, '?') ? '&' : '?').http_build_query($params);
@@ -88,11 +93,15 @@ class Client
         }
 
         $body = ($method == 'GET') ? '' : $this->spec->serialize($params);
-        $vector = $this->spec->sign($this->config, $url, $body, time() + $this->config['deadline'], $requestId);
+        if ($body) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+        }
 
-        $vector->headers[] = "API-REQUEST-ID: {$requestId}";
+        $token = $this->spec->packToken($this->config, $uri, $body, time() + $this->config['lifetime'], $requestId);
 
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array_merge($vector->headers, $headers);
+        $headers = $this->spec->getHeaders($token, $requestId);
+
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_URL, $url);
 
         $response = curl_exec($curl);
@@ -142,9 +151,14 @@ class Client
         return $result;
     }
 
-    protected function _makeUrl($uri)
+    protected function makeRequestId()
     {
-        return 'http://' . $this->config['endpoint'] . $uri;
+        return ((string) (microtime(true) * 10000)) . substr(md5(uniqid('', true)), -18);
+    }
+
+    protected function makeUrl($uri)
+    {
+        return rtrim($this->config['endpoint'], "\/") . $uri;
     }
 
 }

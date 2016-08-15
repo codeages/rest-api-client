@@ -1,5 +1,5 @@
 <?php
-namespace Codeages\RESTAPIClient\Specification;
+namespace Codeages\RestApiClient\Specification;
 
 class JsonHmacSpecification implements Specification
 {
@@ -7,8 +7,8 @@ class JsonHmacSpecification implements Specification
     {
         $headers = array();
         $headers[] = 'Content-type: application/json';
-        $headers[] = "Auth-Token: {$token}";
-        $headers[] = "API-REQUEST-ID: {$requestId}";
+        $headers[] = "X-Auth-Token: {$token}";
+        $headers[] = "X-Request-Id: {$requestId}";
 
         return $headers;
     }
