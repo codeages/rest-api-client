@@ -3,13 +3,19 @@ namespace Codeages\RestApiClient\Specification;
 
 class JsonHmacSpecification implements Specification
 {
+    protected $algo;
+
+    public function __construct($algo = 'sha1')
+    {
+        $this->algo = $algo;
+    }
+
     public function getHeaders($token, $requestId = '')
     {
         $headers = array();
         $headers[] = 'Content-type: application/json';
         $headers[] = "X-Auth-Token: {$token}";
         $headers[] = "X-Request-Id: {$requestId}";
-
         return $headers;
     }
 
@@ -37,7 +43,7 @@ class JsonHmacSpecification implements Specification
     public function signature($config, $url, $body, $deadline, $once)
     {
         $data = implode("\n", [$url, $deadline, $once, $body]);
-        $signature = hash_hmac('sha1', $data, $config['secretKey'], true);
+        $signature = hash_hmac($this->algo, $data, $config['secretKey'], true);
         $signature = str_replace(array('+', '/'), array('-', '_'), base64_encode($signature));
         return $signature;
     }
@@ -47,6 +53,8 @@ class JsonHmacSpecification implements Specification
         if (!is_array($data)) {
             throw new \InvalidArgumentException("In json hmac specification serialize data must be array.");
         }
+
+        ksort($data);
 
         $json = json_encode($data);
         if (JSON_ERROR_NONE !== json_last_error()) {

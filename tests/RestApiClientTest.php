@@ -17,9 +17,9 @@ class RestApiClientTest extends \PHPUnit_Framework_TestCase
 
         $client = new RestApiClient($config, $spec);
 
-        $result = $client->get('/');
+        // $result = $client->get('/');
 
-        var_dump($result);
+        // var_dump($result);
 
 
         // $service = new ApiService([
