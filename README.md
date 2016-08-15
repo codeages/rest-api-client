@@ -9,6 +9,9 @@ composer require codeages/rest-api-client
 ## Useage
 
 ```php
+use Codeages\RestApiClient\RestApiClient;
+use Codeages\RestApiClient\Specification\JsonHmacSpecification;
+
 $config = array(
     'accessKey' => 'testkey',
     'secretKey' => 'secretKey',
