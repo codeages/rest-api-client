@@ -11,22 +11,20 @@ class RestApiClientTest extends \PHPUnit_Framework_TestCase
     public function testSendAuthCode()
     {
         $config = array(
-            'accessKey' => 'testkey',
-            'secretKey' => 'secretKey',
-            'endpoint' => 'http://domain.tld/api/v1/',
+            'accessKey' => 'test_acess_key',
+            'secretKey' => 'test_secret_key',
+            'endpoint' => 'http://passport.dev.com/api/v1',
         );
         $spec = new JsonHmacSpecification();
-        $http = new MockHttpRequest([]);
         $logger = new TestLogger();
 
-        $client = new RestApiClient($config, $spec, $http, $logger, true);
+        $client = new RestApiClient($config, $spec, null, $logger, true);
 
-        $http->mock(function() {
-            return 1;
-        });
-        $result = $client->get('/');
+        $result = $client->get('/users/1');
 
-        $this->assertEquals(1, $result);
+        var_dump($result);
+
+        // $this->assertEquals(1, $result);
     }
 
 }

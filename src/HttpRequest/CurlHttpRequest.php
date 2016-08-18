@@ -77,6 +77,8 @@ class CurlHttpRequest extends HttpRequest
             throw new ServerException($message);
         }
 
+        var_dump($body);exit();
+
         $result = $this->spec->unserialize($body);
         if (empty($result)) {
             $message = $this->message($requestId, "Resut unserialize error (url: {$url}).");
