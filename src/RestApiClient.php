@@ -41,30 +41,30 @@ class RestApiClient
 
     public function post($uri, array $params = array(), array $header = array())
     {
-        return $this->_request('POST', $uri, $params, $header);
+        return $this->request('POST', $uri, $params, $header);
     }
 
     public function put($uri, array $params = array(), array $header = array())
     {
-        return $this->_request('PUT', $uri, $params, $header);
+        return $this->request('PUT', $uri, $params, $header);
     }
 
     public function patch($uri, array $params = array(), array $header = array())
     {
-        return $this->_request('PATCH', $uri, $params, $header);
+        return $this->request('PATCH', $uri, $params, $header);
     }
 
     public function get($uri, array $params = array(), array $header = array())
     {
-        return $this->_request('GET', $uri, $params, $header);
+        return $this->request('GET', $uri, $params, $header);
     }
 
     public function delete($uri, array $params = array(), array $header = array())
     {
-        return $this->_request('DELETE', $uri, $params, $header);
+        return $this->request('DELETE', $uri, $params, $header);
     }
 
-    protected function _request($method, $uri, $params, $headers)
+    public function request($method, $uri, array $params = array(), array $headers = array())
     {
         $requestId = $this->makeRequestId();
         $url = $this->makeUrl($uri);
