@@ -68,11 +68,21 @@ class RestApiClient
     {
         $requestId = $this->makeRequestId();
         $url = $this->makeUrl($uri);
-        $body = ($method == 'GET') ? '' : $this->spec->serialize($params);
+        $body = ($method == 'GET') || empty($params) ? '' : $this->spec->serialize($params);
+
         $token = $this->spec->packToken($this->config, $url, $body, time() + $this->config['lifetime'], $requestId);
         $headers = array_merge($this->spec->getHeaders($token, $requestId), $headers);
 
-        return $this->http->request($method, $url, $body, $headers, $requestId);
+        $body = $this->http->request($method, $url, $body, $headers, $requestId);
+
+        $result = $this->spec->unserialize($body);
+        if (empty($result)) {
+            $message = "[RestApiClient #{$requestId}] Resut unserialize error (url: {$url}).";
+            $this->logger && $this->logger->error($message, $context);
+            throw new ResponseException($message);
+        }
+
+        return $result;
     }
 
     protected function makeRequestId()

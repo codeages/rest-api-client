@@ -20,11 +20,29 @@ class RestApiClientTest extends \PHPUnit_Framework_TestCase
 
         $client = new RestApiClient($config, $spec, null, $logger, true);
 
-        $result = $client->get('/users/1');
+        // $result = $client->get('/mobiles/13757199220/validation');
+        // $result = $client->post('/users', [
+        //     'username' => 'x4',
+        //     'email' => 'x4@xxx.com',
+        //     'mobile' => 13757199221,
+        //     'password' => 'kaifazhe',
+        // ]);
 
-        var_dump($result);
+        $result = $client->post('/clients', [
+            'name' => '测试',
+            'domain' => 'http://xxx.xxx.com',
+            'notify_url' => 'http://xxx.xxx.com/notify_url',
+            'notify_user' => 'http://xxx.xxx.com/notify_url',
+        ]);
 
-        // $this->assertEquals(1, $result);
+        // $result = $client->post('/mobiles/13757199220/code');
+
+
+
+        var_dump($result);exit();
+
+
+        // $this->assertEquals(1, $user['id']);
     }
 
 }
