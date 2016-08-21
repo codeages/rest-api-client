@@ -1,6 +1,6 @@
 <?php
 
-use Codeages\RESTAPIClient\Specification\JsonHmacSpecification;
+use Codeages\RestApiClient\Specification\JsonHmacSpecification;
 
 class JsonHmacSpecificationTest extends \PHPUnit_Framework_TestCase
 {

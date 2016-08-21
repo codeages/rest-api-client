@@ -1,5 +1,5 @@
 <?php
-namespace Codeages\RESTAPIClient\Exceptions;
+namespace Codeages\RestApiClient\Exceptions;
 
 class ServerException extends \RuntimeException
 {
