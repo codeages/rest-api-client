@@ -15,6 +15,8 @@ class CurlHttpRequest extends HttpRequest
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->options['connectTimeout']);
         curl_setopt($curl, CURLOPT_TIMEOUT, $this->options['timeout']);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
         curl_setopt($curl, CURLOPT_HEADER, 1);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_URL, $url);
