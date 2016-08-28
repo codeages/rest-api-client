@@ -5,6 +5,7 @@ use Psr\Log\LoggerInterface;
 use Codeages\RestApiClient\Specification\Specification;
 use Codeages\RestApiClient\HttpRequest\HttpRequest;
 use Codeages\RestApiClient\HttpRequest\CurlHttpRequest;
+use Codeages\RestApiClient\Exceptions\ResponseException;
 
 class RestApiClient
 {
