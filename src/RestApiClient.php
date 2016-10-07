@@ -71,7 +71,7 @@ class RestApiClient
         $url = $this->makeUrl($uri);
         $body = ($method == 'GET') || empty($params) ? '' : $this->spec->serialize($params);
 
-        $token = $this->spec->packToken($this->config, $url, $body, time() + $this->config['lifetime'], $requestId);
+        $token = $this->spec->packToken($this->config, $this->makeSignatureUri($url), $body, time() + $this->config['lifetime'], $requestId);
         $headers = array_merge($this->spec->getHeaders($token, $requestId), $headers);
 
         $body = $this->http->request($method, $url, $body, $headers, $requestId);
@@ -94,6 +94,12 @@ class RestApiClient
     protected function makeUrl($uri)
     {
         return rtrim($this->config['endpoint'], "\/") . $uri;
+    }
+
+    protected function makeSignatureUri($url)
+    {
+        preg_match('/\/\/.*?(\/.*)/', $url, $matches);
+        return $matches[1];
     }
 
 }
