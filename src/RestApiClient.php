@@ -1,10 +1,11 @@
 <?php
+
 namespace Codeages\RestApiClient;
 
 use Psr\Log\LoggerInterface;
-use Codeages\RestApiClient\Specification\Specification;
 use Codeages\RestApiClient\HttpRequest\HttpRequest;
 use Codeages\RestApiClient\HttpRequest\CurlHttpRequest;
+use Codeages\RestApiClient\Specification\Specification;
 use Codeages\RestApiClient\Exceptions\ResponseException;
 
 class RestApiClient
@@ -37,7 +38,6 @@ class RestApiClient
         } else {
             $this->http = $http;
         }
-
     }
 
     public function post($uri, array $params = array(), array $header = array())
@@ -57,6 +57,8 @@ class RestApiClient
 
     public function get($uri, array $params = array(), array $header = array())
     {
+        $uri = $uri.(strpos($uri, '?') ? '&' : '?').http_build_query($params);
+
         return $this->request('GET', $uri, $params, $header);
     }
 
@@ -88,18 +90,18 @@ class RestApiClient
 
     protected function makeRequestId()
     {
-        return ((string) (microtime(true) * 10000)) . substr(md5(uniqid('', true)), -18);
+        return ((string) (microtime(true) * 10000)).substr(md5(uniqid('', true)), -18);
     }
 
     protected function makeUrl($uri)
     {
-        return rtrim($this->config['endpoint'], "\/") . $uri;
+        return rtrim($this->config['endpoint'], "\/").$uri;
     }
 
     protected function makeSignatureUri($url)
     {
         preg_match('/\/\/.*?(\/.*)/', $url, $matches);
+
         return $matches[1];
     }
-
 }
