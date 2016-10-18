@@ -15,29 +15,30 @@ class CurlHttpRequest extends HttpRequest
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->options['connectTimeout']);
         curl_setopt($curl, CURLOPT_TIMEOUT, $this->options['timeout']);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_HEADER, 1);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_URL, $url);
 
         if ($method == 'POST') {
             curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
         } elseif ($method == 'PUT') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
         } elseif ($method == 'DELETE') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
         } elseif ($method == 'PATCH') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
         } else {
             if (!empty($params)) {
                 $url = $url.(strpos($url, '?') ? '&' : '?').http_build_query($params);
             }
         }
 
-        if ($body && $method != 'GET') {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
-        }
+        curl_setopt($curl, CURLOPT_URL, $url);
 
         $response = curl_exec($curl);
         $curlinfo = curl_getinfo($curl);
@@ -86,5 +87,4 @@ class CurlHttpRequest extends HttpRequest
     {
         return "[CurlHttpRequest #$requestId] {$message}";
     }
-
 }

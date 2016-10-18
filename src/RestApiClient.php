@@ -1,5 +1,4 @@
 <?php
-
 namespace Codeages\RestApiClient;
 
 use Psr\Log\LoggerInterface;
@@ -21,18 +20,18 @@ class RestApiClient
     public function __construct($config, Specification $spec, HttpRequest $http = null, LoggerInterface $logger = null, $debug = false)
     {
         $this->config = array_merge(array(
-            'lifetime' => 600,
+            'lifetime' => 600
         ), $config);
 
-        $this->spec = $spec;
-        $this->debug = $debug;
+        $this->spec   = $spec;
+        $this->debug  = $debug;
         $this->logger = $logger;
 
         if (empty($http)) {
             $options = array(
-                'userAgent' => 'Codeages Rest Api Client v1.0.0',
+                'userAgent'      => 'Codeages Rest Api Client v1.0.0',
                 'connectTimeout' => isset($config['connectTimeout']) ? intval($config['connectTimeout']) : 10,
-                'timeout' => isset($config['timeout']) ? intval($config['timeout']) : 10,
+                'timeout'        => isset($config['timeout']) ? intval($config['timeout']) : 10
             );
             $this->http = new CurlHttpRequest($options, $logger, $debug);
         } else {
@@ -58,7 +57,6 @@ class RestApiClient
     public function get($uri, array $params = array(), array $header = array())
     {
         $uri = $uri.(strpos($uri, '?') ? '&' : '?').http_build_query($params);
-
         return $this->request('GET', $uri, $params, $header);
     }
 
@@ -70,13 +68,15 @@ class RestApiClient
     public function request($method, $uri, array $params = array(), array $headers = array())
     {
         $requestId = $this->makeRequestId();
-        $url = $this->makeUrl($uri);
-        $body = ($method == 'GET') || empty($params) ? '' : $this->spec->serialize($params);
+        $url       = $this->makeUrl($uri);
+        $body      = ($method == 'GET') || empty($params) ? '' : $this->spec->serialize($params);
 
-        $token = $this->spec->packToken($this->config, $this->makeSignatureUri($url), $body, time() + $this->config['lifetime'], $requestId);
+        $token   = $this->spec->packToken($this->config, $this->makeSignatureUri($url), $body, time() + $this->config['lifetime'], $requestId);
         $headers = array_merge($this->spec->getHeaders($token, $requestId), $headers);
 
         $body = $this->http->request($method, $url, $body, $headers, $requestId);
+
+        $context = array('headers' => $headers, 'body' => $body);
 
         $result = $this->spec->unserialize($body);
         if (empty($result)) {
@@ -101,7 +101,6 @@ class RestApiClient
     protected function makeSignatureUri($url)
     {
         preg_match('/\/\/.*?(\/.*)/', $url, $matches);
-
         return $matches[1];
     }
 }
